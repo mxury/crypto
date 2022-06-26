@@ -1,8 +1,9 @@
 import numpy as np
 
 class BlockTSSplit():
-    def __init__(self, n_splits):
+    def __init__(self, n_splits, val_prop=0.2):
         self.n_splits = n_splits
+        self.val_prop = val_prop
 
     def split(self, df):
         n_samples = len(df)
@@ -13,6 +14,6 @@ class BlockTSSplit():
         for i in range(self.n_splits):
             start = i * k_fold_size
             stop = start + k_fold_size
-            mid = int(0.8 * (stop - start)) + start
+            mid = int((1 - self.val_prop) * (stop - start)) + start
             yield indices[start: mid], indices[mid + margin: stop]
             
