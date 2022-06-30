@@ -10,11 +10,11 @@ def lstm_model():
     model.add(LSTM(units=50, return_sequences=True))
     model.add(Dropout(0.2))
 
-    # model.add(LSTM(units=50, return_sequences=True))
-    # model.add(Dropout(0.25))
-    #
-    # model.add(LSTM(units=50, return_sequences=True))
-    # model.add(Dropout(0.25))
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.25))
+
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.25))
 
     model.add(LSTM(units=50))
     model.add(Dropout(0.25))
