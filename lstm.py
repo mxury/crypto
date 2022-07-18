@@ -1,27 +1,22 @@
 from keras.models import Sequential
-from keras.layers import Dense, LSTM, Dropout
+from keras.layers import Dense, LSTM, Dropout, Input
 from lstm_data_gen import *
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-def lstm_model():
+def lstm_model(num_features, sequence_length=100):
     model = Sequential()
 
-    model.add(LSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.2))
+    model.add(Input(shape=(sequence_length, num_features)))
 
-    model.add(LSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.25))
+    model.add(LSTM(units=80, recurrent_dropout=0.25, return_sequences=True))
+    model.add(LSTM(units=50, recurrent_dropout=0.25))
 
-    model.add(LSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.25))
-
-    model.add(LSTM(units=50))
-    model.add(Dropout(0.25))
-
+    model.add(Dropout(0.5))
     model.add(Dense(units=1))
+
     model.compile(optimizer='Adam', loss='mean_squared_error',
-                  metrics=['mse'])
+                  metrics=['mae'])
     return model
 
 
@@ -36,12 +31,12 @@ def cv_score(cv_folds, df, model_params):
     cv_history = list()
     early_stopping = EarlyStopping(
         monitor="val_loss",
-        min_delta=0.0001,  # minimium amount of change to count as an improvement
+        min_delta=0.00001,  # minimium amount of change to count as an improvement
         patience=5,  # how many epochs to wait before stopping
         restore_best_weights=True,
     )
     model_checkpoint = ModelCheckpoint(
-            filepath='home/mikiu/Documents/git_projects/crypto/saved_models/model_{epoch}',
+            filepath='saved_models/model_{epoch}',
             save_freq='epoch')
 
     for train, val in cv_folds.split(df):
@@ -61,7 +56,7 @@ def cv_score(cv_folds, df, model_params):
         cv_history.append(history)
 
         scores.append(model.evaluate(dataset_val))
-        model.save(f'home/mikiu/Documents/git_projects/crypto/saved_models/model_{len(cv_history)}')
+        model.save(f'./saved_models/model_{len(cv_history)}')
 
     return scores, cv_history, model
 
