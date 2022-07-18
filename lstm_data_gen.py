@@ -2,13 +2,16 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing import timeseries_dataset_from_array
 
+
 class dataset_generator():
 
-    def __init__(self, X, cv, seq_length, target_column=['close']):
+    def __init__(self, X, cv, seq_length, sampling_rate,  target_column=['close']):
         self.X = X
         self.cv = cv
 
         self.seq_length = seq_length
+        self.sampling_rate = sampling_rate
+        self.delay = self.sampling_rate * self.seq_length
 
         self.target_column = target_column
 
@@ -26,9 +29,16 @@ class dataset_generator():
             self.fold_data.append(fold)
 
     def create_lstm_tensor(self, df):
-        input_data = df.iloc[:-self.seq_length]
-        target = df[self.target_column].iloc[self.seq_length:]
-        return timeseries_dataset_from_array(input_data, target, sequence_length=self.seq_length, shuffle=False)
+        input_data = df.iloc[:-self.delay]
+        target = df[self.target_column].iloc[self.delay:]
+        return timeseries_dataset_from_array(input_data,
+                                             target,
+                                             sequence_length=self.seq_length,
+                                             sampling_rate=self.sampling_rate,
+                                             batch_size = 256,
+                                             shuffle=True,
+                                            )
+
 
 class LSTM_fold_data():
     def __init__(self):
@@ -65,3 +75,5 @@ class LSTM_fold_data():
     @property
     def val_norm(self):
         return self.normalise(self.val)
+
+
